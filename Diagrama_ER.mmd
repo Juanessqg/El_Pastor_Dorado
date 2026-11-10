@@ -1,0 +1,64 @@
+erDiagram
+    CATEGORIA {
+        int id_categoria PK "SERIAL"
+        varchar nombre UK "VARCHAR(60) NOT NULL"
+        varchar descripcion "VARCHAR(200)"
+        varchar estado "VARCHAR(10) NOT NULL CHECK: Activa, Inactiva"
+    }
+
+    PRODUCTO {
+        int id_producto PK "SERIAL"
+        int id_categoria FK "NOT NULL"
+        varchar nombre UK "VARCHAR(80) NOT NULL"
+        numeric precio_unitario "NUMERIC(10,2) NOT NULL CHECK > 0"
+        int stock_porciones "INTEGER NOT NULL CHECK >= 0"
+        int stock_minimo "INTEGER NOT NULL CHECK >= 0"
+        varchar estado "VARCHAR(12) NOT NULL CHECK: Disponible, Agotado"
+    }
+
+    EMPLEADO {
+        int id_empleado PK "SERIAL"
+        varchar documento_identidad UK "VARCHAR(20) NOT NULL"
+        varchar nombres "VARCHAR(60) NOT NULL"
+        varchar apellidos "VARCHAR(60) NOT NULL"
+        varchar rol "VARCHAR(10) NOT NULL CHECK: Cajero, Mesero, Taquero"
+        varchar turno "VARCHAR(12) NOT NULL CHECK: Matutino, Vespertino, Nocturno"
+    }
+
+    ORDEN {
+        int id_orden PK "SERIAL"
+        int id_empleado FK "NOT NULL"
+        int numero_mesa "INTEGER NOT NULL CHECK > 0"
+        varchar tipo_servicio "VARCHAR(12) NOT NULL CHECK: Comedor, Para Llevar"
+        timestamp fecha_hora "TIMESTAMP NOT NULL DEFAULT NOW()"
+        numeric subtotal "NUMERIC(12,2) NOT NULL CHECK >= 0"
+        numeric propina "NUMERIC(12,2) NOT NULL CHECK >= 0"
+        numeric total "NUMERIC(12,2) NOT NULL CHECK >= 0"
+        varchar estado "VARCHAR(15) NOT NULL CHECK: Abierta, En Preparacion, Cobrada, Cancelada"
+    }
+
+    DETALLE_ORDEN {
+        int id_detalle PK "SERIAL"
+        int id_orden FK "NOT NULL"
+        int id_producto FK "NOT NULL"
+        int cantidad "INTEGER NOT NULL CHECK > 0"
+        numeric precio_unitario_historico "NUMERIC(10,2) NOT NULL CHECK > 0"
+        numeric importe_linea "NUMERIC(12,2) NOT NULL CHECK > 0"
+        varchar notas_preparacion "VARCHAR(200)"
+    }
+
+    PAGO {
+        int id_pago PK "SERIAL"
+        int id_orden FK "NOT NULL"
+        varchar metodo_pago "VARCHAR(15) NOT NULL CHECK: Efectivo, Tarjeta, Transferencia"
+        numeric monto_pagado "NUMERIC(12,2) NOT NULL CHECK > 0"
+        numeric cambio "NUMERIC(12,2) NOT NULL CHECK >= 0"
+        timestamp fecha_hora_pago "TIMESTAMP NOT NULL DEFAULT NOW()"
+        varchar referencia_transaccion "VARCHAR(60)"
+    }
+
+    CATEGORIA ||--o{ PRODUCTO : "contiene"
+    EMPLEADO ||--o{ ORDEN : "atiende"
+    ORDEN ||--o{ DETALLE_ORDEN : "incluye"
+    PRODUCTO ||--o{ DETALLE_ORDEN : "aparece en"
+    ORDEN ||--o{ PAGO : "recibe"
